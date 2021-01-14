@@ -1,44 +1,48 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Task from './Task';
 import TaskForm from './TaskForm';
+import { connect } from "react-redux";
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { createTaskReq, updateTaskReq, deleteTaskReq } from "../redux/task/taskAction";
+
 
 function TaskList(props) {
 
-    const [tasks, setTasks] = useState([])
-
     const addTask = task => {
-        if (!task.text || /^\s*$/.test(task.text)) {
-            return
-        }
-        const newTask = [task, ...tasks]
-
-        setTasks(newTask)
-
-        console.log(newTask)
+        console.log(task)
+        props.createTaskReq(task)
     }
 
-    const updateTask = (taskId, newValue) => {
-        if (!newValue.text || /^\s*$/.test(newValue.text)) {
-            return
-        }
-        setTasks(prev => prev.map(item => (item.id === taskId ? newValue : item)))
+    const updateTask = (task) => {
+        props.updateTaskReq(task)
     }
 
 
     const removeTask = id => {
-        const removeArr = [...tasks].filter(task => task.id !== id)
-
-        setTasks(removeArr)
+        toast.error("Task Deleted!", {
+            position: "bottom-right",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+        });
+        props.deleteTaskReq(id)
     }
 
     const completeTask = id => {
-        let updatedTasks = tasks.map(task => {
+        let completedTask = props.newTask.map(task => {
             if (task.id === id) {
                 task.isComplete = !task.isComplete
             }
             return task
         })
-        setTasks(updatedTasks)
+        toast.success("Task Completed!", {
+            position: "bottom-left",
+            autoClose: 2000,
+            hideProgressBar: true,
+            closeOnClick: true,
+        });
+        props.updateTaskReq(completedTask)
     }
 
     return (
@@ -46,7 +50,7 @@ function TaskList(props) {
             <h1>Task list</h1>
             <TaskForm onSubmit={addTask} />
             <Task
-                tasks={tasks}
+                tasks={props.newTask}
                 updateTask={updateTask}
                 completeTask={completeTask}
                 removeTask={removeTask}
@@ -55,4 +59,19 @@ function TaskList(props) {
     );
 }
 
-export default TaskList;
+const mapStateToProps = state => {
+    return {
+        newTask: state.task.newTask
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        createTaskReq: (payload) => dispatch(createTaskReq(payload)),
+        updateTaskReq: (payload) => dispatch(updateTaskReq(payload)),
+        deleteTaskReq: (payload) => dispatch(deleteTaskReq(payload)),
+    }
+}
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(TaskList);

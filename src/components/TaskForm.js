@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 function TaskForm(props) {
 
@@ -17,11 +19,19 @@ function TaskForm(props) {
     const handleSubmit = e => {
         e.preventDefault()
 
-        props.onSubmit({
-            id: Math.floor(Math.random() * 10000),
-            text: input
-        })
-        setInput("")
+
+        if (props.edit) {
+            props.onSubmit(input)
+            setInput("")
+        }
+        else {
+            props.onSubmit({
+                id: Math.floor(Math.random() * 10000),
+                text: input,
+                isComplete: false
+            })
+            setInput("")
+        }
     }
 
     return (
@@ -54,6 +64,7 @@ function TaskForm(props) {
                         <button className="task-button">Add Task</button>
                     </>)
             }
+            <ToastContainer />
         </form>
     );
 }
